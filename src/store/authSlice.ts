@@ -1,32 +1,42 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
+interface User {
+  email: string;
+  password: string; // Plain text for demo (not hashed)
+}
+
 interface AuthState {
-  user: { id: string; email: string | null; name: string | null } | null;
-  isLoading: boolean;
+  user: User | null;
+  users: User[]; // Store all registered users
 }
 
 const initialState: AuthState = {
   user: null,
-  isLoading: true,
+  users: JSON.parse(localStorage.getItem('users') || '[]'), // Load from localStorage
 };
 
 const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    setUser: (state, action: PayloadAction<AuthState['user']>) => {
+    signUp: (state, action: PayloadAction<User>) => {
+      state.users.push(action.payload);
       state.user = action.payload;
-      state.isLoading = false;
+      localStorage.setItem('users', JSON.stringify(state.users));
     },
-    setLoading: (state, action: PayloadAction<boolean>) => {
-      state.isLoading = action.payload;
+    signIn: (state, action: PayloadAction<User>) => {
+      const user = state.users.find(
+        (u) => u.email === action.payload.email && u.password === action.payload.password,
+      );
+      if (user) {
+        state.user = user;
+      }
     },
     signOut: (state) => {
       state.user = null;
-      state.isLoading = false;
     },
   },
 });
 
-export const { setUser, setLoading, signOut } = authSlice.actions;
+export const { signUp, signIn, signOut } = authSlice.actions;
 export default authSlice.reducer;

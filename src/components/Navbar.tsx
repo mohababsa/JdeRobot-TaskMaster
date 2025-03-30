@@ -1,12 +1,19 @@
 import { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../store';
+import { signOut } from '../store/authSlice';
 
 interface NavbarProps {
   isDarkMode: boolean;
   toggleDarkMode: () => void;
+  onSignInClick: () => void;
+  onSignUpClick: () => void;
 }
 
-export default function Navbar({ isDarkMode, toggleDarkMode }: NavbarProps) {
+export default function Navbar({ isDarkMode, toggleDarkMode, onSignInClick, onSignUpClick }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const dispatch = useDispatch();
+  const user = useSelector((state: RootState) => state.auth.user);
 
   return (
     <header className={`sticky top-0 z-40 w-full border-b ${isDarkMode ? 'bg-gray-900 border-gray-700' : 'bg-white/95 border-gray-200'} backdrop-blur`}>
@@ -15,7 +22,6 @@ export default function Navbar({ isDarkMode, toggleDarkMode }: NavbarProps) {
           <span className={`font-bold text-2xl ${isDarkMode ? 'text-indigo-400' : 'text-indigo-600'}`}>TaskMaster</span>
         </div>
 
-        {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-6">
           <span className={`text-lg font-medium ${isDarkMode ? 'text-gray-300 hover:text-indigo-400' : 'text-gray-600 hover:text-indigo-600'} cursor-pointer`}>Dashboard</span>
           <span className={`text-lg font-medium ${isDarkMode ? 'text-gray-300 hover:text-indigo-400' : 'text-gray-600 hover:text-indigo-600'} cursor-pointer`}>Projects</span>
@@ -23,8 +29,30 @@ export default function Navbar({ isDarkMode, toggleDarkMode }: NavbarProps) {
           <span className={`text-lg font-medium ${isDarkMode ? 'text-gray-300 hover:text-indigo-400' : 'text-gray-600 hover:text-indigo-600'} cursor-pointer`}>Analytics</span>
         </nav>
 
-        {/* Theme Toggle and Mobile Menu */}
         <div className="flex items-center gap-4">
+          {user ? (
+            <button
+              onClick={() => dispatch(signOut())}
+              className={`text-lg ${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-800'}`}
+            >
+              Logout
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={onSignInClick}
+                className={`text-lg ${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-800'}`}
+              >
+                Sign In
+              </button>
+              <button
+                onClick={onSignUpClick}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-lg hover:bg-indigo-700"
+              >
+                Sign Up
+              </button>
+            </>
+          )}
           <button
             onClick={toggleDarkMode}
             className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
@@ -50,7 +78,6 @@ export default function Navbar({ isDarkMode, toggleDarkMode }: NavbarProps) {
         </div>
       </div>
 
-      {/* Mobile Navigation */}
       {isOpen && (
         <div className={`md:hidden border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
           <div className="flex flex-col space-y-3 py-4 px-4">
