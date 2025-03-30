@@ -4,6 +4,7 @@ import { RootState } from '../store';
 import { signOut as reduxSignOut } from '../store/authSlice';
 import { signOut as firebaseSignOut } from 'firebase/auth';
 import { auth } from '../lib/firebase';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface NavbarProps {
   isDarkMode: boolean;
@@ -13,13 +14,15 @@ interface NavbarProps {
 }
 
 export default function Navbar({ isDarkMode, toggleDarkMode, onSignInClick, onSignUpClick }: NavbarProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false); // Mobile menu
+  const [isProfileOpen, setIsProfileOpen] = useState(false); // Profile dropdown
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.auth.user);
 
   const handleSignOut = async () => {
     await firebaseSignOut(auth);
     dispatch(reduxSignOut());
+    setIsProfileOpen(false); // Close dropdown on logout
   };
 
   return (
@@ -38,12 +41,53 @@ export default function Navbar({ isDarkMode, toggleDarkMode, onSignInClick, onSi
 
         <div className="flex items-center gap-4">
           {user ? (
-            <button
-              onClick={handleSignOut}
-              className={`text-lg ${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-800'}`}
-            >
-              Logout
-            </button>
+            <div className="relative">
+              <button
+                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
+                aria-label="User profile"
+              >
+                <svg
+                  className={`h-6 w-6 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  />
+                </svg>
+              </button>
+              <AnimatePresence>
+                {isProfileOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className={`absolute right-0 mt-2 w-48 rounded-lg shadow-lg ${isDarkMode ? 'bg-gray-800 text-gray-300' : 'bg-white text-gray-600'} border ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}
+                  >
+                    <div className="py-1">
+                      <button
+                        onClick={() => setIsProfileOpen(false)}
+                        className={`block w-full text-left px-4 py-2 text-lg hover:bg-gray-100 dark:hover:bg-gray-700 ${isDarkMode ? 'hover:text-white' : 'hover:text-gray-800'}`}
+                      >
+                        Profile
+                      </button>
+                      <button
+                        onClick={handleSignOut}
+                        className={`block w-full text-left px-4 py-2 text-lg hover:bg-gray-100 dark:hover:bg-gray-700 ${isDarkMode ? 'hover:text-white' : 'hover:text-gray-800'}`}
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           ) : (
             <>
               <button
