@@ -4,6 +4,9 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { RootState } from './store';
 import { setNotifications } from './store/tasksSlice';
+import { setUser } from './store/authSlice';
+import { auth } from './lib/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import TaskForm from './components/TaskForm';
@@ -24,6 +27,14 @@ export default function App() {
   const dispatch = useDispatch();
   const { tasks, notifications } = useSelector((state: RootState) => state.tasks);
   const user = useSelector((state: RootState) => state.auth.user);
+
+  // Sync Firebase auth state with Redux
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      dispatch(setUser(firebaseUser));
+    });
+    return () => unsubscribe();
+  }, [dispatch]);
 
   useEffect(() => {
     const checkDueDates = () => {

@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store';
-import { signOut } from '../store/authSlice';
+import { signOut as reduxSignOut } from '../store/authSlice';
+import { signOut as firebaseSignOut } from 'firebase/auth';
+import { auth } from '../lib/firebase';
 
 interface NavbarProps {
   isDarkMode: boolean;
@@ -14,6 +16,11 @@ export default function Navbar({ isDarkMode, toggleDarkMode, onSignInClick, onSi
   const [isOpen, setIsOpen] = useState(false);
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.auth.user);
+
+  const handleSignOut = async () => {
+    await firebaseSignOut(auth);
+    dispatch(reduxSignOut());
+  };
 
   return (
     <header className={`sticky top-0 z-40 w-full border-b ${isDarkMode ? 'bg-gray-900 border-gray-700' : 'bg-white/95 border-gray-200'} backdrop-blur`}>
@@ -32,7 +39,7 @@ export default function Navbar({ isDarkMode, toggleDarkMode, onSignInClick, onSi
         <div className="flex items-center gap-4">
           {user ? (
             <button
-              onClick={() => dispatch(signOut())}
+              onClick={handleSignOut}
               className={`text-lg ${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-800'}`}
             >
               Logout

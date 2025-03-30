@@ -1,6 +1,9 @@
 import { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { signUp } from '../store/authSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../store';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../lib/firebase';
+import { setUser, setError } from '../store/authSlice';
 import { motion } from 'framer-motion';
 
 interface SignUpModalProps {
@@ -11,20 +14,22 @@ interface SignUpModalProps {
 export default function SignUpModal({ isOpen, onClose }: SignUpModalProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const dispatch = useDispatch();
+  const error = useSelector((state: RootState) => state.auth.error);
 
-  const handleSignUp = (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    if (users.some((u: { email: string }) => u.email === email)) {
-      setError('Email already exists');
-    } else {
-      dispatch(signUp({ email, password }));
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      dispatch(setUser(userCredential.user));
       setEmail('');
       setPassword('');
-      setError('');
       onClose();
+    } catch (error: unknown) {
+      console.log('Error:', error);
+      // Type error as unknown and narrow it
+      const errorMessage = error instanceof Error ? error.message : 'Failed to sign up';
+      dispatch(setError(errorMessage));
     }
   };
 

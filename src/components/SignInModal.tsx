@@ -1,6 +1,9 @@
 import { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { signIn } from '../store/authSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../store';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../lib/firebase';
+import { setUser, setError } from '../store/authSlice';
 import { motion } from 'framer-motion';
 
 interface SignInModalProps {
@@ -11,21 +14,22 @@ interface SignInModalProps {
 export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const dispatch = useDispatch();
+  const error = useSelector((state: RootState) => state.auth.error);
 
-  const handleSignIn = (e: React.FormEvent) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    const user = users.find((u: { email: string; password: string }) => u.email === email && u.password === password);
-    if (user) {
-      dispatch(signIn({ email, password }));
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      dispatch(setUser(userCredential.user));
       setEmail('');
       setPassword('');
-      setError('');
       onClose();
-    } else {
-      setError('Invalid email or password');
+    } catch (error: unknown) {
+      console.log('Error:', error);
+      // Type error as unknown and narrow it
+      const errorMessage = error instanceof Error ? error.message : 'Failed to sign in';
+      dispatch(setError(errorMessage));
     }
   };
 

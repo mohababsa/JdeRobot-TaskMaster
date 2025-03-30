@@ -1,42 +1,33 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-
-interface User {
-  email: string;
-  password: string; // Plain text for demo (not hashed)
-}
+import { User } from 'firebase/auth'; // Only import User
 
 interface AuthState {
-  user: User | null;
-  users: User[]; // Store all registered users
+  user: User | null; // Firebase User type
+  error: string | null;
 }
 
 const initialState: AuthState = {
   user: null,
-  users: JSON.parse(localStorage.getItem('users') || '[]'), // Load from localStorage
+  error: null,
 };
 
 const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    signUp: (state, action: PayloadAction<User>) => {
-      state.users.push(action.payload);
+    setUser: (state, action: PayloadAction<User | null>) => {
       state.user = action.payload;
-      localStorage.setItem('users', JSON.stringify(state.users));
+      state.error = null;
     },
-    signIn: (state, action: PayloadAction<User>) => {
-      const user = state.users.find(
-        (u) => u.email === action.payload.email && u.password === action.payload.password,
-      );
-      if (user) {
-        state.user = user;
-      }
+    setError: (state, action: PayloadAction<string>) => {
+      state.error = action.payload;
     },
     signOut: (state) => {
       state.user = null;
+      state.error = null;
     },
   },
 });
 
-export const { signUp, signIn, signOut } = authSlice.actions;
+export const { setUser, setError, signOut } = authSlice.actions;
 export default authSlice.reducer;
