@@ -1,54 +1,41 @@
-# React + TypeScript + Vite
+# GSoC 2025 - JdeRobot React Challenge: Task Management Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Overview
+This project is a task management application developed as part of the GSoC 2025 application for JdeRobot. It extends a basic task management app with advanced features using React, Redux, and Vite. The app allows users to manage tasks efficiently with filtering, categorization, prioritization, search, drag-and-drop reordering, and due date notifications.
 
-Currently, two official plugins are available:
+## Implementation Details
+- **Language**: TypeScript with React
+- **Libraries**:
+  - React (UI)
+  - Redux Toolkit (state management)
+  - React DnD (drag-and-drop)
+  - React Datepicker (due dates)
+  - Tailwind CSS (styling)
+  - UUID (unique task IDs)
+  - Framer Motion (animations)
+- **Structure**: Modular React components (`Navbar`, `Footer`, `TaskForm`, `TaskList`, `TaskFilters`, `SearchBar`) with Redux slices (`tasksSlice`, `filtersSlice`)
+- **Features**:
+  - Add, remove, and toggle task completion
+  - Filter tasks by status (all, completed, incomplete), category, and priority
+  - Categorize tasks (personal, work, groceries, health, finance)
+  - Set task priorities (high, medium, low) with visual indicators
+  - Search tasks by title
+  - Reorder tasks via drag-and-drop
+  - Set due dates with notifications for tasks due within 24 hours
+  - Dark/light mode toggle with animations
+- **Bundler**: Vite (see justification below)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Why Vite Instead of Webpack?
+The challenge suggests Webpack, but I chose Vite for the following reasons:
+- **Faster Development**: Vite leverages native ES modules and provides instant hot module replacement (HMR), significantly speeding up development compared to Webpack’s slower rebuilds.
+- **Simpler Configuration**: Vite requires minimal setup out of the box, reducing complexity for a project of this scope, whereas Webpack often needs extensive configuration for TypeScript, React, and CSS.
+- **Modern Ecosystem**: Vite aligns with modern JavaScript tooling trends, offering better performance for small-to-medium apps like this one, and integrates seamlessly with Tailwind and TypeScript.
+- **Production Efficiency**: Vite uses Rollup under the hood for production builds, producing optimized bundles with a smaller footprint than Webpack’s default output.
 
-## Expanding the ESLint configuration
+While Webpack is robust for large-scale apps, Vite’s speed and simplicity made it a better fit for rapid prototyping and development within the GSoC timeline.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+## How to Run
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/mohababsa/taskmaster.git
+   ```
