@@ -1,7 +1,7 @@
 # GSoC 2025 - JdeRobot React Challenge: Task Management Application
 
 ## Overview
-This project is a task management application developed as part of the GSoC 2025 application for JdeRobot. It extends a basic task management app with advanced features using React, Redux, and Vite. The app allows users to manage tasks efficiently with filtering, categorization, prioritization, search, drag-and-drop reordering, and due date notifications.
+This project is a task management application developed as part of the GSoC 2025 application for JdeRobot. It extends a basic task management app with advanced features using React, Redux, and Vite. The app allows users to manage tasks efficiently with filtering, categorization, prioritization, search and drag-and-drop reordering.
 
 ## Implementation Details
 - **Language**: TypeScript with React
@@ -39,3 +39,26 @@ While Webpack is robust for large-scale apps, Vite’s speed and simplicity made
    ```bash
    git clone https://github.com/mohababsa/taskmaster.git
    ```
+2. **Install Dependencies**:
+   ```bash
+   npm install
+   ```
+3. **Run the Application**:
+   ```bash
+   npm run dev
+   ```
+   Opens at `http://localhost:5173`
+4. **Build for Production**:
+   ```bash
+   npm run build
+   npm run preview
+   ```
+5. **Dependencies**:
+  - Core: `react`, `react-dom`, `react-redux`, `@reduxjs/toolkit`
+  - Features: `react-dnd`, `react-dnd-html5-backend`, `react-datepicker`, `uuid`
+  - Styling: `tailwindcss`, `framer-motion` 
+  - Dev Tools: `vite`, `typescript`, `eslint`, etc.
+## Author
+**Mohamed ABABSA** - GSoC 2025 Applicant
+
+
