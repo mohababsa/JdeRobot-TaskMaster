@@ -41,22 +41,22 @@ export default function TaskForm({ onClose }: TaskFormProps) {
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-6">
       <form
         onSubmit={handleSubmit}
-        className="bg-white rounded-xl p-8 w-full max-w-2xl shadow-2xl"
+        className="bg-white dark:bg-gray-800 rounded-xl p-8 w-full max-w-2xl shadow-2xl"
       >
-        <h2 className="text-2xl font-semibold text-gray-800 mb-6">Add New Task</h2>
+        <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-6">Add New Task</h2>
         
         <div className="space-y-6">
           <input
             placeholder="Task title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full p-4 text-lg border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full p-4 text-lg border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
           />
 
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value as 'personal' | 'work' | 'groceries' | 'health' | 'finance')}
-            className="w-full p-4 text-lg border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full p-4 text-lg border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
           >
             <option value="personal">Personal</option>
             <option value="work">Work</option>
@@ -68,7 +68,7 @@ export default function TaskForm({ onClose }: TaskFormProps) {
           <select
             value={priority}
             onChange={(e) => setPriority(e.target.value as 'high' | 'medium' | 'low')}
-            className="w-full p-4 text-lg border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full p-4 text-lg border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
           >
             <option value="high">High</option>
             <option value="medium">Medium</option>
@@ -78,7 +78,7 @@ export default function TaskForm({ onClose }: TaskFormProps) {
           <DatePicker
             selected={dueDate}
             onChange={(date: Date | null) => setDueDate(date)}
-            className="w-full p-4 text-lg border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full p-4 text-lg border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
             placeholderText="Select due date"
           />
         </div>
@@ -87,7 +87,7 @@ export default function TaskForm({ onClose }: TaskFormProps) {
           <button
             type="button"
             onClick={onClose}
-            className="px-6 py-3 text-lg text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg"
+            className="px-6 py-3 text-lg text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
           >
             Cancel
           </button>

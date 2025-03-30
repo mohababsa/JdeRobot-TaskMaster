@@ -1,52 +1,83 @@
 import { useState } from 'react';
-import { useAuth } from '../lib/auth-context';
-import { Button } from './ui/Button'; // We’ll create this
 
-export default function Navbar({ onSignInClick, onSignUpClick }: { onSignInClick: () => void; onSignUpClick: () => void }) {
+interface NavbarProps {
+  isDarkMode: boolean;
+  toggleDarkMode: () => void;
+}
+
+export default function Navbar({ isDarkMode, toggleDarkMode }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const { user, signOut } = useAuth();
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-white/95 backdrop-blur">
+    <header className={`sticky top-0 z-40 w-full border-b ${isDarkMode ? 'bg-gray-900 border-gray-700' : 'bg-white/95 border-gray-200'} backdrop-blur`}>
       <div className="max-w-7xl mx-auto flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-2">
-          <span className="font-bold text-xl text-indigo-600">TaskMaster</span>
+          <span className={`font-bold text-2xl ${isDarkMode ? 'text-indigo-400' : 'text-indigo-600'}`}>TaskMaster</span>
         </div>
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-6">
-          <span className="text-sm font-medium text-gray-600 hover:text-indigo-600 cursor-pointer">Dashboard</span>
-          <span className="text-sm font-medium text-gray-600 hover:text-indigo-600 cursor-pointer">Projects</span>
-          <span className="text-sm font-medium text-gray-600 hover:text-indigo-600 cursor-pointer">Calendar</span>
-          <span className="text-sm font-medium text-gray-600 hover:text-indigo-600 cursor-pointer">Analytics</span>
+          <span className={`text-lg font-medium ${isDarkMode ? 'text-gray-300 hover:text-indigo-400' : 'text-gray-600 hover:text-indigo-600'} cursor-pointer`}>Dashboard</span>
+          <span className={`text-lg font-medium ${isDarkMode ? 'text-gray-300 hover:text-indigo-400' : 'text-gray-600 hover:text-indigo-600'} cursor-pointer`}>Projects</span>
+          <span className={`text-lg font-medium ${isDarkMode ? 'text-gray-300 hover:text-indigo-400' : 'text-gray-600 hover:text-indigo-600'} cursor-pointer`}>Calendar</span>
+          <span className={`text-lg font-medium ${isDarkMode ? 'text-gray-300 hover:text-indigo-400' : 'text-gray-600 hover:text-indigo-600'} cursor-pointer`}>Analytics</span>
         </nav>
 
-        <div className="flex items-center gap-2">
-          {user ? (
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-700">{user.email}</span>
-              <Button variant="outline" onClick={signOut}>Logout</Button>
-            </div>
-          ) : (
-            <>
-              <Button variant="ghost" onClick={onSignInClick}>Sign In</Button>
-              <Button variant="default" onClick={onSignUpClick}>Sign Up</Button>
-            </>
-          )}
-          <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsOpen(!isOpen)}>
+        {/* Theme Toggle and Mobile Menu */}
+        <div className="flex items-center gap-4">
+          <button
+            onClick={toggleDarkMode}
+            className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
+            aria-label="Toggle dark mode"
+          >
+            {isDarkMode ? (
+              <svg className="h-6 w-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+            ) : (
+              <svg className="h-6 w-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              </svg>
+            )}
+          </button>
+          <button
+            className="md:hidden p-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
+            onClick={() => setIsOpen(!isOpen)}
+            aria-label="Toggle menu"
+          >
             {isOpen ? '✕' : '☰'}
-          </Button>
+          </button>
         </div>
       </div>
 
       {/* Mobile Navigation */}
       {isOpen && (
-        <div className="md:hidden border-t">
+        <div className={`md:hidden border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
           <div className="flex flex-col space-y-3 py-4 px-4">
-            <span className="text-sm font-medium text-gray-600 hover:text-indigo-600 cursor-pointer" onClick={() => setIsOpen(false)}>Dashboard</span>
-            <span className="text-sm font-medium text-gray-600 hover:text-indigo-600 cursor-pointer" onClick={() => setIsOpen(false)}>Projects</span>
-            <span className="text-sm font-medium text-gray-600 hover:text-indigo-600 cursor-pointer" onClick={() => setIsOpen(false)}>Calendar</span>
-            <span className="text-sm font-medium text-gray-600 hover:text-indigo-600 cursor-pointer" onClick={() => setIsOpen(false)}>Analytics</span>
+            <span
+              className={`text-lg font-medium ${isDarkMode ? 'text-gray-300 hover:text-indigo-400' : 'text-gray-600 hover:text-indigo-600'} cursor-pointer`}
+              onClick={() => setIsOpen(false)}
+            >
+              Dashboard
+            </span>
+            <span
+              className={`text-lg font-medium ${isDarkMode ? 'text-gray-300 hover:text-indigo-400' : 'text-gray-600 hover:text-indigo-600'} cursor-pointer`}
+              onClick={() => setIsOpen(false)}
+            >
+              Projects
+            </span>
+            <span
+              className={`text-lg font-medium ${isDarkMode ? 'text-gray-300 hover:text-indigo-400' : 'text-gray-600 hover:text-indigo-600'} cursor-pointer`}
+              onClick={() => setIsOpen(false)}
+            >
+              Calendar
+            </span>
+            <span
+              className={`text-lg font-medium ${isDarkMode ? 'text-gray-300 hover:text-indigo-400' : 'text-gray-600 hover:text-indigo-600'} cursor-pointer`}
+              onClick={() => setIsOpen(false)}
+            >
+              Analytics
+            </span>
           </div>
         </div>
       )}
