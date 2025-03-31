@@ -1,11 +1,12 @@
 export interface Task {
   id: string;
   title: string;
+  description: string;
+  dueDate?: string;
+  priority: 'low' | 'medium' | 'high';
   completed: boolean;
-  category: 'personal' | 'work' | 'groceries' | 'health' | 'finance'; // Narrowed from string
-  priority: 'high' | 'medium' | 'low';
-  dueDate: Date | null;
-  createdAt: string;
+  userId: string;
+  category: 'personal' | 'work' | 'groceries' | 'health' | 'finance'; // Add if not present
 }
 
 export interface TasksState {

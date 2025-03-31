@@ -28,7 +28,6 @@ export default function App() {
   const { tasks, notifications } = useSelector((state: RootState) => state.tasks);
   const user = useSelector((state: RootState) => state.auth.user);
 
-  // Sync Firebase auth state with Redux
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       dispatch(setUser(firebaseUser));

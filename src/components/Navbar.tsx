@@ -5,6 +5,7 @@ import { signOut as reduxSignOut } from '../store/authSlice';
 import { signOut as firebaseSignOut } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { motion, AnimatePresence } from 'framer-motion';
+import ProfileModal from './ProfileModal'; // Import ProfileModal
 
 interface NavbarProps {
   isDarkMode: boolean;
@@ -16,6 +17,7 @@ interface NavbarProps {
 export default function Navbar({ isDarkMode, toggleDarkMode, onSignInClick, onSignUpClick }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false); // Mobile menu
   const [isProfileOpen, setIsProfileOpen] = useState(false); // Profile dropdown
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false); // Profile modal
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.auth.user);
 
@@ -72,7 +74,10 @@ export default function Navbar({ isDarkMode, toggleDarkMode, onSignInClick, onSi
                   >
                     <div className="py-1">
                       <button
-                        onClick={() => setIsProfileOpen(false)}
+                        onClick={() => {
+                          setIsProfileOpen(false);
+                          setIsProfileModalOpen(true); // Open ProfileModal
+                        }}
                         className={`block w-full text-left px-4 py-2 text-lg hover:bg-gray-100 dark:hover:bg-gray-700 ${isDarkMode ? 'hover:text-white' : 'hover:text-gray-800'}`}
                       >
                         Profile
@@ -159,6 +164,9 @@ export default function Navbar({ isDarkMode, toggleDarkMode, onSignInClick, onSi
           </div>
         </div>
       )}
+
+      {/* Add ProfileModal */}
+      <ProfileModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} />
     </header>
   );
 }

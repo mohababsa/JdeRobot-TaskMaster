@@ -1,5 +1,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { FiltersState } from '../types';
+
+interface FiltersState {
+  status: 'all' | 'completed' | 'incomplete';
+  category: 'all' | 'personal' | 'work' | 'groceries' | 'health' | 'finance';
+  priority: 'all' | 'high' | 'medium' | 'low';
+  searchTerm: string;
+}
 
 const initialState: FiltersState = {
   status: 'all',
@@ -19,10 +25,10 @@ const filtersSlice = createSlice({
       state,
       action: PayloadAction<'all' | 'personal' | 'work' | 'groceries' | 'health' | 'finance'>,
     ) => {
-      state.category = action.payload; // Line 19 - now type-safe
+      state.category = action.payload;
     },
-    setPriorityFilter: (state, action: PayloadAction<string>) => {
-      state.priority = action.payload;
+    setPriorityFilter: (state, action: PayloadAction<'all' | 'high' | 'medium' | 'low'>) => {
+      state.priority = action.payload; // Updated to specific union type
     },
     setSearchTerm: (state, action: PayloadAction<string>) => {
       state.searchTerm = action.payload;

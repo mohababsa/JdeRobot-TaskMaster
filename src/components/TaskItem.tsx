@@ -1,9 +1,9 @@
 import { useRef } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../store'; // Import AppDispatch and RootState
 import { useDrag, useDrop } from 'react-dnd';
 import { format } from 'date-fns';
-import { Task } from '../types';
-import { toggleTask, removeTask } from '../store/tasksSlice';
+import { Task, updateTask, deleteTask, updateTaskInFirestore, deleteTaskFromFirestore } from '../store/tasksSlice'; // Update imports
 
 interface TaskItemProps {
   task: Task;
@@ -12,7 +12,8 @@ interface TaskItemProps {
 }
 
 export default function TaskItem({ task, index, moveTask }: TaskItemProps) {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>(); // Use AppDispatch for thunks
+  const user = useSelector((state: RootState) => state.auth.user); // Get user for userId
   const ref = useRef<HTMLDivElement>(null);
 
   const [{ isDragging }, drag] = useDrag({
@@ -34,6 +35,21 @@ export default function TaskItem({ task, index, moveTask }: TaskItemProps) {
   });
 
   drag(drop(ref));
+
+  const handleToggleComplete = () => {
+    const updatedTask = { ...task, completed: !task.completed };
+    dispatch(updateTask(updatedTask)); // Update local Redux state
+    if (user) {
+      dispatch(updateTaskInFirestore(updatedTask)); // Sync with Firestore
+    }
+  };
+
+  const handleDelete = () => {
+    dispatch(deleteTask(task.id)); // Update local Redux state
+    if (user) {
+      dispatch(deleteTaskFromFirestore(task.id)); // Sync with Firestore
+    }
+  };
 
   const priorityColors = {
     high: 'border-red-500 bg-red-50',
@@ -61,43 +77,43 @@ export default function TaskItem({ task, index, moveTask }: TaskItemProps) {
       className={`flex items-center p-4 mb-3 rounded-lg border-l-4 ${
         priorityColors[task.priority]
       } ${isDragging ? 'opacity-60 scale-95' : 'opacity-100'} ${
-        task.completed ? 'bg-gray-100' : 'bg-white'
+        task.completed ? 'bg-gray-100 dark:bg-gray-700' : 'bg-white dark:bg-gray-800'
       } shadow-md hover:shadow-lg transition-all duration-200 cursor-move`}
     >
       <span className="mr-3 text-gray-400 cursor-grab text-lg">☰</span>
       <input
         type="checkbox"
         checked={task.completed}
-        onChange={() => dispatch(toggleTask(task.id))}
+        onChange={handleToggleComplete} // Updated handler
         className="mr-3 h-5 w-5 text-indigo-600 rounded focus:ring-indigo-500"
       />
       <div className="flex-1 min-w-0">
         <p
           className={`text-lg font-medium truncate ${
-            task.completed ? 'line-through text-gray-400' : 'text-gray-800'
+            task.completed ? 'line-through text-gray-400 dark:text-gray-400' : 'text-gray-800 dark:text-white'
           }`}
         >
           {task.title}
         </p>
         <div className="flex flex-wrap gap-2 mt-1 text-sm">
-          <span className="flex items-center px-2 py-1 rounded-full bg-gray-100 text-gray-800">
+          <span className="flex items-center px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-gray-200">
             {categoryIcons[task.category]}
             <span className="ml-1 capitalize">{task.category}</span>
           </span>
-          <span className="flex items-center px-2 py-1 rounded-full bg-gray-100 text-gray-800">
+          <span className="flex items-center px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-gray-200">
             {priorityIcons[task.priority]}
             <span className="ml-1 capitalize">{task.priority}</span>
           </span>
           {task.dueDate && (
-            <span className="px-2 py-1 rounded-full bg-gray-100 text-gray-600">
+            <span className="px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300">
               {format(new Date(task.dueDate), 'MMM d')}
             </span>
           )}
         </div>
       </div>
       <button
-        onClick={() => dispatch(removeTask(task.id))}
-        className="ml-4 text-red-500 hover:text-red-700 text-lg"
+        onClick={handleDelete} // Updated handler
+        className="ml-4 text-red-500 hover:text-red-700 dark:hover:text-red-400 text-lg"
       >
         ✕
       </button>

@@ -1,51 +1,59 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Task, TasksState } from '../types';
+import { db } from '../lib/firebase';
+import { collection, onSnapshot, query, where, doc, updateDoc, deleteDoc, DocumentData, QueryDocumentSnapshot } from 'firebase/firestore';
+import { AppDispatch } from '../store'; // Import AppDispatch for typing
+
+export interface Task {
+  id: string;
+  title: string;
+  description: string;
+  dueDate?: string;
+  priority: 'low' | 'medium' | 'high';
+  completed: boolean;
+  userId: string;
+  category: 'personal' | 'work' | 'groceries' | 'health' | 'finance';
+}
+
+interface TasksState {
+  tasks: Task[];
+  notifications: string[];
+}
 
 const initialState: TasksState = {
-  tasks: [
-    { id: '1', title: 'Complete project proposal', completed: false, category: 'work', priority: 'high', dueDate: new Date(Date.now() + 1000 * 60 * 60 * 3), createdAt: new Date().toISOString() },
-    { id: '2', title: 'Buy groceries', completed: false, category: 'groceries', priority: 'medium', dueDate: new Date(Date.now() + 1000 * 60 * 60 * 24), createdAt: new Date().toISOString() },
-    { id: '3', title: 'Go for a run', completed: true, category: 'health', priority: 'low', dueDate: null, createdAt: new Date().toISOString() },
-    { id: '4', title: 'Pay electricity bill', completed: false, category: 'finance', priority: 'high', dueDate: new Date(Date.now() + 1000 * 60 * 60 * 48), createdAt: new Date().toISOString() },
-  ],
+  tasks: [],
   notifications: [],
 };
+
+// Use QueryDocumentSnapshot<DocumentData> for Firestore doc
+const mapFirestoreToTask = (doc: QueryDocumentSnapshot<DocumentData>): Task => ({
+  id: doc.id,
+  title: doc.data().title,
+  description: doc.data().description,
+  dueDate: doc.data().dueDate,
+  priority: doc.data().priority,
+  completed: doc.data().completed,
+  userId: doc.data().userId,
+  category: doc.data().category,
+});
 
 const tasksSlice = createSlice({
   name: 'tasks',
   initialState,
   reducers: {
-    addTask: (
-      state,
-      action: PayloadAction<{
-        id: string; // Added id to payload
-        title: string;
-        category: 'personal' | 'work' | 'groceries' | 'health' | 'finance';
-        priority: 'high' | 'medium' | 'low';
-        dueDate: Date | null;
-      }>,
-    ) => {
-      const { id, title, category, priority, dueDate } = action.payload;
-      state.tasks.push({
-        id, // Use provided id instead of generating it here
-        title,
-        completed: false,
-        category,
-        priority,
-        dueDate,
-        createdAt: new Date().toISOString(),
-      });
-    },
-    toggleTask: (state, action: PayloadAction<string>) => {
-      const task = state.tasks.find((task) => task.id === action.payload);
-      if (task) task.completed = !task.completed;
-    },
-    removeTask: (state, action: PayloadAction<string>) => {
-      state.tasks = state.tasks.filter((task) => task.id !== action.payload);
-      state.notifications = state.notifications.filter((id) => id !== action.payload);
-    },
-    reorderTasks: (state, action: PayloadAction<Task[]>) => {
+    setTasks: (state, action: PayloadAction<Task[]>) => {
       state.tasks = action.payload;
+    },
+    addTask: (state, action: PayloadAction<Task>) => {
+      state.tasks.push(action.payload);
+    },
+    updateTask: (state, action: PayloadAction<Task>) => {
+      const index = state.tasks.findIndex((task) => task.id === action.payload.id);
+      if (index !== -1) {
+        state.tasks[index] = action.payload;
+      }
+    },
+    deleteTask: (state, action: PayloadAction<string>) => {
+      state.tasks = state.tasks.filter((task) => task.id !== action.payload);
     },
     setNotifications: (state, action: PayloadAction<string[]>) => {
       state.notifications = action.payload;
@@ -53,6 +61,42 @@ const tasksSlice = createSlice({
   },
 });
 
-export const { addTask, toggleTask, removeTask, reorderTasks, setNotifications } = tasksSlice.actions;
+export const { setTasks, addTask, updateTask, deleteTask, setNotifications } = tasksSlice.actions;
+
+// Use AppDispatch for dispatch type
+export const fetchTasks = (userId: string) => (dispatch: AppDispatch) => {
+  console.log(`Fetching tasks for userId: ${userId}`);
+  const q = query(collection(db, 'tasks'), where('userId', '==', userId));
+  const unsubscribe = onSnapshot(
+    q,
+    (snapshot) => {
+      const tasksData = snapshot.docs.map(mapFirestoreToTask);
+      console.log('Tasks fetched:', tasksData);
+      dispatch(setTasks(tasksData));
+    },
+    (error) => {
+      console.error('Error fetching tasks:', error);
+    }
+  );
+  return unsubscribe;
+};
+
+export const updateTaskInFirestore = (task: Task) => async () => {
+  const taskRef = doc(db, 'tasks', task.id);
+  await updateDoc(taskRef, {
+    title: task.title,
+    description: task.description,
+    dueDate: task.dueDate,
+    priority: task.priority,
+    completed: task.completed,
+    userId: task.userId,
+    category: task.category,
+  });
+};
+
+export const deleteTaskFromFirestore = (taskId: string) => async () => {
+  const taskRef = doc(db, 'tasks', taskId);
+  await deleteDoc(taskRef);
+};
 
 export default tasksSlice.reducer;

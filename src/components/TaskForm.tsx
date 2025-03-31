@@ -1,104 +1,140 @@
 import { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import { v4 as uuidv4 } from 'uuid';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../store';
 import { addTask } from '../store/tasksSlice';
+import { db } from '../lib/firebase';
+import { collection, addDoc } from 'firebase/firestore';
+import { motion } from 'framer-motion';
 
 interface TaskFormProps {
   onClose: () => void;
 }
 
 export default function TaskForm({ onClose }: TaskFormProps) {
-  const dispatch = useDispatch();
   const [title, setTitle] = useState('');
-  const [category, setCategory] = useState<'personal' | 'work' | 'groceries' | 'health' | 'finance'>('personal');
-  const [priority, setPriority] = useState<'high' | 'medium' | 'low'>('medium');
-  const [dueDate, setDueDate] = useState<Date | null>(null);
+  const [description, setDescription] = useState('');
+  const [dueDate, setDueDate] = useState('');
+  const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
+  const [category, setCategory] = useState<'personal' | 'work' | 'groceries' | 'health' | 'finance'>('personal'); // Added category
+  const dispatch = useDispatch();
+  const user = useSelector((state: RootState) => state.auth.user);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim()) return;
+    if (!user) return;
 
-    dispatch(
-      addTask({
-        id: uuidv4(),
+    try {
+      const taskData = {
         title,
-        category,
+        description,
+        dueDate: dueDate || undefined,
         priority,
-        dueDate,
-      }),
-    );
+        completed: false,
+        userId: user.uid,
+        category, // Added category
+      };
 
-    setTitle('');
-    setCategory('personal');
-    setPriority('medium');
-    setDueDate(null);
-    onClose();
+      // Add task to Firestore
+      const docRef = await addDoc(collection(db, 'tasks'), taskData);
+      const newTask = { ...taskData, id: docRef.id };
+
+      // Dispatch to Redux for immediate UI update
+      dispatch(addTask(newTask));
+
+      // Reset form and close
+      setTitle('');
+      setDescription('');
+      setDueDate('');
+      setPriority('medium');
+      setCategory('personal'); // Reset category
+      onClose();
+    } catch (error) {
+      console.error('Error adding task:', error);
+    }
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-6">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white dark:bg-gray-800 rounded-xl p-8 w-full max-w-2xl shadow-2xl"
+    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        transition={{ duration: 0.3 }}
+        className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 w-full max-w-md"
       >
-        <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-6">Add New Task</h2>
-        
-        <div className="space-y-6">
-          <input
-            placeholder="Task title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-full p-4 text-lg border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
-          />
-
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value as 'personal' | 'work' | 'groceries' | 'health' | 'finance')}
-            className="w-full p-4 text-lg border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
-          >
-            <option value="personal">Personal</option>
-            <option value="work">Work</option>
-            <option value="groceries">Groceries</option>
-            <option value="health">Health</option>
-            <option value="finance">Finance</option>
-          </select>
-
-          <select
-            value={priority}
-            onChange={(e) => setPriority(e.target.value as 'high' | 'medium' | 'low')}
-            className="w-full p-4 text-lg border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
-          >
-            <option value="high">High</option>
-            <option value="medium">Medium</option>
-            <option value="low">Low</option>
-          </select>
-
-          <DatePicker
-            selected={dueDate}
-            onChange={(date: Date | null) => setDueDate(date)}
-            className="w-full p-4 text-lg border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
-            placeholderText="Select due date"
-          />
-        </div>
-
-        <div className="flex justify-end gap-4 mt-8">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-6 py-3 text-lg text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="px-6 py-3 text-lg bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-          >
-            Add Task
-          </button>
-        </div>
-      </form>
+        <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Add New Task</h2>
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Title</label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full p-3 mt-1 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full p-3 mt-1 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
+              rows={3}
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Due Date</label>
+            <input
+              type="date"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+              className="w-full p-3 mt-1 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Priority</label>
+            <select
+              value={priority}
+              onChange={(e) => setPriority(e.target.value as 'low' | 'medium' | 'high')}
+              className="w-full p-3 mt-1 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
+            >
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value as 'personal' | 'work' | 'groceries' | 'health' | 'finance')}
+              className="w-full p-3 mt-1 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
+            >
+              <option value="personal">Personal</option>
+              <option value="work">Work</option>
+              <option value="groceries">Groceries</option>
+              <option value="health">Health</option>
+              <option value="finance">Finance</option>
+            </select>
+          </div>
+          <div className="flex justify-end gap-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition duration-200"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-200"
+            >
+              Add Task
+            </button>
+          </div>
+        </form>
+      </motion.div>
     </div>
   );
 }
