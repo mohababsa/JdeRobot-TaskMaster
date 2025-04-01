@@ -18,7 +18,7 @@ TaskMaster is a feature-rich task management application developed as part of th
 - **Profile Management**: Edit user profile (name, photo) with photo uploads to Supabase Storage (work in progress).
 - **UI Enhancements**: Dark/light mode toggle, sidebar with icons, and animations via Framer Motion.
 - **Responsive Design**: Fully responsive across mobile and desktop devices.
-- 
+
 ## Screenshots
 
 Below are key features of TaskMaster:
