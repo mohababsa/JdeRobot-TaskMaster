@@ -141,5 +141,6 @@ Vite’s advantages made it ideal for rapid prototyping within the GSoC timeline
   Verification: Check uploaded files in Supabase Dashboard > Storage > profile_photos
 ## Author
 **Mohamed ABABSA** - GSoC 2025 Applicant
-
+## License
+TaskMaster is licensed under the [MIT License](LICENSE)
 
