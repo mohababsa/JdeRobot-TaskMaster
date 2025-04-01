@@ -18,6 +18,19 @@ TaskMaster is a feature-rich task management application developed as part of th
 - **Profile Management**: Edit user profile (name, photo) with photo uploads to Supabase Storage (work in progress).
 - **UI Enhancements**: Dark/light mode toggle, sidebar with icons, and animations via Framer Motion.
 - **Responsive Design**: Fully responsive across mobile and desktop devices.
+- 
+## Screenshots
+
+Below are key features of TaskMaster:
+
+| Feature | Screenshot |
+|---------|------------|
+| **Sign Up**<br>Sign-up modal for new users. | ![Sign Up](screenshots/signup.png) |
+| **Sign In**<br>Sign-in modal for existing users. | ![Sign In](screenshots/signin.png) |
+| **Tasks List with Notifications**<br>Task list showing drag-and-drop and due date notifications. | ![Tasks List](screenshots/tasks-list.png) |
+| **Dashboard**<br>Overview of task stats with progress and categories. | ![Dashboard](screenshots/dashboard.png) |
+| **Analytics**<br>Charts displaying task completion and distribution. | ![Analytics](screenshots/analytics.png) |
+| **Calendar**<br>Calendar view of tasks with due dates. | ![Calendar](screenshots/calendar.png) |
 
 ## Implementation Details
 - **Language**: TypeScript with React
