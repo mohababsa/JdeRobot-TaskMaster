@@ -92,16 +92,39 @@ Vite’s advantages made it ideal for rapid prototyping within the GSoC timeline
    npm run dev
    ```
    Opens at `http://localhost:5173`
-4. **Build for Production**:
+6. **Build for Production**:
    ```bash
    npm run build
    npm run preview
    ```
-5. **Dependencies**:
-  - Core: `react`, `react-dom`, `react-redux`, `@reduxjs/toolkit`
-  - Features: `react-dnd`, `react-dnd-html5-backend`, `react-datepicker`, `uuid`
-  - Styling: `tailwindcss`, `framer-motion` 
-  - Dev Tools: `vite`, `typescript`, `eslint`, etc.
+## Firebase and Supabase Usage
+
+### Firebase Authentication
+- **Purpose**: Manages user sign-in, sign-up, and profile data (display name, photo URL).
+- **Setup**:
+  - Initialized in `src/lib/firebase.ts` with `getAuth`.
+  - Configured with your Firebase project’s credentials.
+- **Features**:
+  - **Sign In/Sign Up**: Handled via `SignInModal` and `SignUpModal` using `signInWithEmailAndPassword` and `createUserWithEmailAndPassword`.
+  - **Sign Out**: Triggered from `Navbar` with `signOut`, clearing Redux state via `reduxSignOut`.
+  - **Profile Updates**: `updateProfile` in `ProfileModal` updates `displayName` and `photoURL`.
+- **State Management**: User data is stored in Redux (`authSlice`) and synced with Firebase via `onAuthStateChanged` in `App.tsx`.
+- **Verification**: Check user details in Firebase Console > Authentication > Users.
+
+### Supabase Storage
+- **Purpose**: Stores profile photos, replacing Firebase Storage to stay within free tier limits.
+- **Setup**:
+  - Initialized in `src/lib/supabase.ts` with `createClient`.
+  - Bucket: `profile_photos` created in Supabase Dashboard.
+- **Features**:
+  - **Photo Upload**: In `ProfileModal`, photos are uploaded to `profile_photos/<uid>/<filename>` using `supabase.storage.from('profile_photos').upload`.
+  - **URL Retrieval**: Public URLs are fetched with `getPublicUrl` and saved to Firebase Auth’s `photoURL`.
+- **Policies**: Default authenticated upload policy with a custom rule ensuring users only upload to their UID folder:
+  ```sql
+  allow authenticated users to upload:
+  (auth.uid() = split_part(name, '/', 1))
+  ```
+  Verification: Check uploaded files in Supabase Dashboard > Storage > profile_photos
 ## Author
 **Mohamed ABABSA** - GSoC 2025 Applicant
 
