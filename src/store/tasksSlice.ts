@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { db } from '../lib/firebase';
 import { collection, onSnapshot, query, where, doc, updateDoc, deleteDoc, DocumentData, QueryDocumentSnapshot } from 'firebase/firestore';
-import { AppDispatch } from '../store'; // Import AppDispatch for typing
+import { AppDispatch } from '../store';
 
 export interface Task {
   id: string;
@@ -24,7 +24,6 @@ const initialState: TasksState = {
   notifications: [],
 };
 
-// Use QueryDocumentSnapshot<DocumentData> for Firestore doc
 const mapFirestoreToTask = (doc: QueryDocumentSnapshot<DocumentData>): Task => ({
   id: doc.id,
   title: doc.data().title,
@@ -55,15 +54,20 @@ const tasksSlice = createSlice({
     deleteTask: (state, action: PayloadAction<string>) => {
       state.tasks = state.tasks.filter((task) => task.id !== action.payload);
     },
-    setNotifications: (state, action: PayloadAction<string[]>) => {
-      state.notifications = action.payload;
+    addNotification: (state, action: PayloadAction<string>) => {
+      // Prevent duplicates
+      if (!state.notifications.includes(action.payload)) {
+        state.notifications.push(action.payload);
+      }
+    },
+    clearNotification: (state, action: PayloadAction<number>) => {
+      state.notifications.splice(action.payload, 1);
     },
   },
 });
 
-export const { setTasks, addTask, updateTask, deleteTask, setNotifications } = tasksSlice.actions;
+export const { setTasks, addTask, updateTask, deleteTask, addNotification, clearNotification } = tasksSlice.actions;
 
-// Use AppDispatch for dispatch type
 export const fetchTasks = (userId: string) => (dispatch: AppDispatch) => {
   console.log(`Fetching tasks for userId: ${userId}`);
   const q = query(collection(db, 'tasks'), where('userId', '==', userId));
@@ -73,6 +77,15 @@ export const fetchTasks = (userId: string) => (dispatch: AppDispatch) => {
       const tasksData = snapshot.docs.map(mapFirestoreToTask);
       console.log('Tasks fetched:', tasksData);
       dispatch(setTasks(tasksData));
+      tasksData.forEach((task) => {
+        const now = new Date();
+        const dueDate = task.dueDate ? new Date(task.dueDate) : null;
+        const twentyFourHoursFromNow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+        if (dueDate && dueDate > now && dueDate <= twentyFourHoursFromNow && !task.completed) {
+          console.log('Adding notification for:', task.title);
+          dispatch(addNotification(`${task.title} is due soon!`));
+        }
+      });
     },
     (error) => {
       console.error('Error fetching tasks:', error);

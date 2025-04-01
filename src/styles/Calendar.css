@@ -1,0 +1,64 @@
+/* src/styles/Calendar.css */
+.rbc-calendar {
+    background-color: #ffffff !important; /* Light mode background */
+    color: #1f2937 !important; /* Gray-800 for text */
+  }
+  
+  .dark .rbc-calendar {
+    background-color: #1f2937 !important; /* Gray-800 for dark mode */
+    color: #d1d5db !important; /* Gray-300 for text */
+  }
+  
+  .rbc-today {
+    background-color: #e0e7ff !important; /* Light indigo for today */
+  }
+  
+  .dark .rbc-today {
+    background-color: #4f46e5 !important; /* Indigo-600 for dark mode today */
+  }
+  
+  .rbc-event {
+    background-color: #4f46e5 !important; /* Indigo-600 for events */
+    color: #ffffff !important;
+    border: none !important;
+  }
+  
+  .rbc-event.rbc-selected {
+    background-color: #6366f1 !important; /* Indigo-500 for selected */
+  }
+  
+  .rbc-time-header {
+    background-color: #f3f4f6 !important; /* Gray-100 */
+  }
+  
+  .dark .rbc-time-header {
+    background-color: #374151 !important; /* Gray-700 */
+  }
+  
+  .rbc-time-content {
+    border-color: #d1d5db !important; /* Gray-300 */
+  }
+  
+  .dark .rbc-time-content {
+    border-color: #4b5563 !important; /* Gray-600 */
+  }
+  
+  .rbc-btn-group button {
+    background-color: #ffffff !important;
+    color: #4f46e5 !important; /* Indigo-600 */
+    border: 1px solid #d1d5db !important; /* Gray-300 */
+  }
+  
+  .dark .rbc-btn-group button {
+    background-color: #374151 !important; /* Gray-700 */
+    color: #c7d2fe !important; /* Indigo-200 */
+    border: 1px solid #4b5563 !important; /* Gray-600 */
+  }
+  
+  .rbc-btn-group button:hover {
+    background-color: #e0e7ff !important; /* Light indigo hover */
+  }
+  
+  .dark .rbc-btn-group button:hover {
+    background-color: #4f46e5 !important; /* Indigo-600 hover */
+  }

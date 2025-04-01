@@ -1,7 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../store';
-import { updateTask, deleteTask, fetchTasks, updateTaskInFirestore, deleteTaskFromFirestore, setTasks } from '../store/tasksSlice';
+import { updateTask, deleteTask, fetchTasks, updateTaskInFirestore, deleteTaskFromFirestore, setTasks, clearNotification } from '../store/tasksSlice';
 import { useDrag, useDrop } from 'react-dnd';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
@@ -130,9 +130,11 @@ const TaskItem = ({ task, index, moveTask }: TaskItemProps) => {
 
 export default function TaskList({}: TaskListProps) {
   const dispatch = useDispatch<AppDispatch>();
-  const { tasks } = useSelector((state: RootState) => state.tasks);
-  const { status, category, priority, searchTerm } = useSelector((state: RootState) => state.filters); // Added searchTerm
+  const { tasks, notifications } = useSelector((state: RootState) => state.tasks);
+  const { status, category, priority, searchTerm } = useSelector((state: RootState) => state.filters);
   const user = useSelector((state: RootState) => state.auth.user);
+  const [page, setPage] = useState(1); // Current page
+  const tasksPerPage = 10; // Number of tasks per page
 
   useEffect(() => {
     if (user?.uid) {
@@ -171,30 +173,103 @@ export default function TaskList({}: TaskListProps) {
     const dueDate = task.dueDate ? new Date(task.dueDate) : null;
     const twentyFourHoursFromNow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
 
+    console.log('Filtering task:', task.title, 'Status:', status);
+
     const statusMatch =
       status === 'all' ||
       (status === 'completed' && task.completed) ||
-      (status === 'incomplete' && !task.completed);
+      (status === 'incomplete' && !task.completed) ||
+      (status === 'due-soon' && dueDate && dueDate > now && dueDate <= twentyFourHoursFromNow && !task.completed);
 
     const categoryMatch = category === 'all' || task.category === category;
 
     const priorityMatch = priority === 'all' || task.priority === priority;
 
-    const dueSoonMatch =
-      dueDate && dueDate > now && dueDate <= twentyFourHoursFromNow && !task.completed;
-
     const searchMatch =
       task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       task.description.toLowerCase().includes(searchTerm.toLowerCase());
 
-    return statusMatch && categoryMatch && priorityMatch && (status !== 'due-soon' || dueSoonMatch) && searchMatch;
+    return statusMatch && categoryMatch && priorityMatch && searchMatch;
   });
 
+  // Pagination logic
+  const totalTasks = filteredTasks.length;
+  const totalPages = Math.ceil(totalTasks / tasksPerPage);
+  const paginatedTasks = filteredTasks.slice((page - 1) * tasksPerPage, page * tasksPerPage);
+
+  const handleNextPage = () => {
+    if (page < totalPages) {
+      setPage(page + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (page > 1) {
+      setPage(page - 1);
+    }
+  };
+
   return (
-    <div ref={dropRef} className="space-y-4">
-      {filteredTasks.map((task, index) => (
-        <TaskItem key={task.id} task={task} index={index} moveTask={moveTask} />
-      ))}
+    <div className="flex flex-col md:flex-row gap-6">
+      {/* Task List */}
+      <div ref={dropRef} className="w-full md:w-2/3 space-y-4">
+        {paginatedTasks.map((task, index) => (
+          <TaskItem key={task.id} task={task} index={index} moveTask={moveTask} />
+        ))}
+        {totalTasks > tasksPerPage && (
+          <div className="flex justify-between mt-4">
+            <button
+              onClick={handlePreviousPage}
+              disabled={page === 1}
+              className={`px-4 py-2 rounded-lg ${
+                page === 1
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-indigo-600 text-white hover:bg-indigo-700'
+              }`}
+            >
+              Previous
+            </button>
+            <span className="text-gray-600 dark:text-gray-300">
+              Page {page} of {totalPages}
+            </span>
+            <button
+              onClick={handleNextPage}
+              disabled={page === totalPages}
+              className={`px-4 py-2 rounded-lg ${
+                page === totalPages
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-indigo-600 text-white hover:bg-indigo-700'
+              }`}
+            >
+              Next
+            </button>
+          </div>
+        )}
+      </div>
+      {/* Notifications */}
+      {notifications.length > 0 && (
+        <div className="w-full md:w-1/3 space-y-2">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Notifications</h3>
+          {notifications.map((notification, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="flex items-center justify-between p-3 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 rounded-lg shadow"
+            >
+              <span>{notification}</span>
+              <button
+                onClick={() => dispatch(clearNotification(index))}
+                className="text-yellow-600 hover:text-yellow-800 dark:text-yellow-400 dark:hover:text-yellow-300"
+              >
+                ✕
+              </button>
+            </motion.div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

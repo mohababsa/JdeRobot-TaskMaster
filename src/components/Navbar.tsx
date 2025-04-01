@@ -5,7 +5,7 @@ import { signOut as reduxSignOut } from '../store/authSlice';
 import { signOut as firebaseSignOut } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { motion, AnimatePresence } from 'framer-motion';
-import ProfileModal from './ProfileModal'; // Import ProfileModal
+import ProfileModal from './ProfileModal';
 
 interface NavbarProps {
   isDarkMode: boolean;
@@ -24,7 +24,7 @@ export default function Navbar({ isDarkMode, toggleDarkMode, onSignInClick, onSi
   const handleSignOut = async () => {
     await firebaseSignOut(auth);
     dispatch(reduxSignOut());
-    setIsProfileOpen(false); // Close dropdown on logout
+    setIsProfileOpen(false);
   };
 
   return (
@@ -33,13 +33,6 @@ export default function Navbar({ isDarkMode, toggleDarkMode, onSignInClick, onSi
         <div className="flex items-center gap-2">
           <span className={`font-bold text-2xl ${isDarkMode ? 'text-indigo-400' : 'text-indigo-600'}`}>TaskMaster</span>
         </div>
-
-        <nav className="hidden md:flex items-center gap-6">
-          <span className={`text-lg font-medium ${isDarkMode ? 'text-gray-300 hover:text-indigo-400' : 'text-gray-600 hover:text-indigo-600'} cursor-pointer`}>Dashboard</span>
-          <span className={`text-lg font-medium ${isDarkMode ? 'text-gray-300 hover:text-indigo-400' : 'text-gray-600 hover:text-indigo-600'} cursor-pointer`}>Projects</span>
-          <span className={`text-lg font-medium ${isDarkMode ? 'text-gray-300 hover:text-indigo-400' : 'text-gray-600 hover:text-indigo-600'} cursor-pointer`}>Calendar</span>
-          <span className={`text-lg font-medium ${isDarkMode ? 'text-gray-300 hover:text-indigo-400' : 'text-gray-600 hover:text-indigo-600'} cursor-pointer`}>Analytics</span>
-        </nav>
 
         <div className="flex items-center gap-4">
           {user ? (
@@ -76,7 +69,7 @@ export default function Navbar({ isDarkMode, toggleDarkMode, onSignInClick, onSi
                       <button
                         onClick={() => {
                           setIsProfileOpen(false);
-                          setIsProfileModalOpen(true); // Open ProfileModal
+                          setIsProfileModalOpen(true);
                         }}
                         className={`block w-full text-left px-4 py-2 text-lg hover:bg-gray-100 dark:hover:bg-gray-700 ${isDarkMode ? 'hover:text-white' : 'hover:text-gray-800'}`}
                       >
@@ -137,35 +130,50 @@ export default function Navbar({ isDarkMode, toggleDarkMode, onSignInClick, onSi
       {isOpen && (
         <div className={`md:hidden border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
           <div className="flex flex-col space-y-3 py-4 px-4">
-            <span
-              className={`text-lg font-medium ${isDarkMode ? 'text-gray-300 hover:text-indigo-400' : 'text-gray-600 hover:text-indigo-600'} cursor-pointer`}
-              onClick={() => setIsOpen(false)}
-            >
-              Dashboard
-            </span>
-            <span
-              className={`text-lg font-medium ${isDarkMode ? 'text-gray-300 hover:text-indigo-400' : 'text-gray-600 hover:text-indigo-600'} cursor-pointer`}
-              onClick={() => setIsOpen(false)}
-            >
-              Projects
-            </span>
-            <span
-              className={`text-lg font-medium ${isDarkMode ? 'text-gray-300 hover:text-indigo-400' : 'text-gray-600 hover:text-indigo-600'} cursor-pointer`}
-              onClick={() => setIsOpen(false)}
-            >
-              Calendar
-            </span>
-            <span
-              className={`text-lg font-medium ${isDarkMode ? 'text-gray-300 hover:text-indigo-400' : 'text-gray-600 hover:text-indigo-600'} cursor-pointer`}
-              onClick={() => setIsOpen(false)}
-            >
-              Analytics
-            </span>
+            {user ? (
+              <>
+                <button
+                  onClick={() => {
+                    setIsOpen(false);
+                    setIsProfileModalOpen(true);
+                  }}
+                  className={`text-lg font-medium text-left ${isDarkMode ? 'text-gray-300 hover:text-indigo-400' : 'text-gray-600 hover:text-indigo-600'}`}
+                >
+                  Profile
+                </button>
+                <button
+                  onClick={handleSignOut}
+                  className={`text-lg font-medium text-left ${isDarkMode ? 'text-gray-300 hover:text-indigo-400' : 'text-gray-600 hover:text-indigo-600'}`}
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => {
+                    setIsOpen(false);
+                    onSignInClick();
+                  }}
+                  className={`text-lg font-medium text-left ${isDarkMode ? 'text-gray-300 hover:text-indigo-400' : 'text-gray-600 hover:text-indigo-600'}`}
+                >
+                  Sign In
+                </button>
+                <button
+                  onClick={() => {
+                    setIsOpen(false);
+                    onSignUpClick();
+                  }}
+                  className={`text-lg font-medium text-left ${isDarkMode ? 'text-gray-300 hover:text-indigo-400' : 'text-gray-600 hover:text-indigo-600'}`}
+                >
+                  Sign Up
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}
 
-      {/* Add ProfileModal */}
       <ProfileModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} />
     </header>
   );

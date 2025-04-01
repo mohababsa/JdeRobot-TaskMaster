@@ -7,7 +7,9 @@ export default function TaskFilters() {
   const { status, category, priority, searchTerm } = useSelector((state: RootState) => state.filters);
 
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    dispatch(setStatusFilter(e.target.value as 'all' | 'completed' | 'incomplete'));
+    const newStatus = e.target.value as 'all' | 'completed' | 'incomplete' | 'due-soon';
+    console.log('Dispatching new status:', newStatus); // Debug log
+    dispatch(setStatusFilter(newStatus));
   };
 
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -26,6 +28,8 @@ export default function TaskFilters() {
     dispatch(clearFilters());
   };
 
+  console.log('Current filters state:', { status, category, priority, searchTerm }); // Debug log
+
   return (
     <div className="flex flex-col gap-4 mb-6">
       <div className="flex flex-col sm:flex-row gap-4">
@@ -34,9 +38,10 @@ export default function TaskFilters() {
           onChange={handleStatusChange}
           className="w-full sm:w-1/4 p-3 text-lg border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
         >
-          <option value="all">All Statuses</option>
+          <option value="all">All</option>
+          <option value="incomplete">Active</option>
           <option value="completed">Completed</option>
-          <option value="incomplete">Incomplete</option>
+          <option value="due-soon">Due Soon</option>
         </select>
 
         <select

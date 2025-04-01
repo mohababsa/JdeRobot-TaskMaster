@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface FiltersState {
-  status: 'all' | 'completed' | 'incomplete';
+  status: 'all' | 'completed' | 'incomplete' | 'due-soon';
   category: 'all' | 'personal' | 'work' | 'groceries' | 'health' | 'finance';
   priority: 'all' | 'high' | 'medium' | 'low';
   searchTerm: string;
@@ -18,17 +18,14 @@ const filtersSlice = createSlice({
   name: 'filters',
   initialState,
   reducers: {
-    setStatusFilter: (state, action: PayloadAction<'all' | 'completed' | 'incomplete'>) => {
+    setStatusFilter: (state, action: PayloadAction<'all' | 'completed' | 'incomplete' | 'due-soon'>) => {
       state.status = action.payload;
     },
-    setCategoryFilter: (
-      state,
-      action: PayloadAction<'all' | 'personal' | 'work' | 'groceries' | 'health' | 'finance'>,
-    ) => {
+    setCategoryFilter: (state, action: PayloadAction<'all' | 'personal' | 'work' | 'groceries' | 'health' | 'finance'>) => {
       state.category = action.payload;
     },
     setPriorityFilter: (state, action: PayloadAction<'all' | 'high' | 'medium' | 'low'>) => {
-      state.priority = action.payload; // Updated to specific union type
+      state.priority = action.payload;
     },
     setSearchTerm: (state, action: PayloadAction<string>) => {
       state.searchTerm = action.payload;
@@ -42,7 +39,5 @@ const filtersSlice = createSlice({
   },
 });
 
-export const { setStatusFilter, setCategoryFilter, setPriorityFilter, setSearchTerm, clearFilters } =
-  filtersSlice.actions;
-
+export const { setStatusFilter, setCategoryFilter, setPriorityFilter, setSearchTerm, clearFilters } = filtersSlice.actions;
 export default filtersSlice.reducer;
