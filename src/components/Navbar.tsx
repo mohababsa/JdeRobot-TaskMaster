@@ -22,8 +22,12 @@ export default function Navbar({ isDarkMode, toggleDarkMode, onSignInClick, onSi
   const user = useSelector((state: RootState) => state.auth.user);
 
   const handleSignOut = async () => {
-    await firebaseSignOut(auth);
-    dispatch(reduxSignOut());
+    try {
+      await firebaseSignOut(auth);
+      dispatch(reduxSignOut());
+    } catch (error) {
+      console.error('Sign out failed:', error);
+    }
     setIsProfileOpen(false);
   };
 
@@ -39,7 +43,7 @@ export default function Navbar({ isDarkMode, toggleDarkMode, onSignInClick, onSi
             <div className="relative">
               <button
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
-                className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
+                className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 aria-label="User profile"
               >
                 <svg
@@ -96,7 +100,7 @@ export default function Navbar({ isDarkMode, toggleDarkMode, onSignInClick, onSi
               </button>
               <button
                 onClick={onSignUpClick}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-lg hover:bg-indigo-700"
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
                 Sign Up
               </button>
@@ -104,7 +108,7 @@ export default function Navbar({ isDarkMode, toggleDarkMode, onSignInClick, onSi
           )}
           <button
             onClick={toggleDarkMode}
-            className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
+            className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             aria-label="Toggle dark mode"
           >
             {isDarkMode ? (
@@ -118,7 +122,7 @@ export default function Navbar({ isDarkMode, toggleDarkMode, onSignInClick, onSi
             )}
           </button>
           <button
-            className="md:hidden p-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
+            className="md:hidden p-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             onClick={() => setIsOpen(!isOpen)}
             aria-label="Toggle menu"
           >

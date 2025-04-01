@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store';
-import { storage } from '../lib/firebase'; // Remove auth import
-import { updateProfile, updateEmail } from 'firebase/auth';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { setUser } from '../store/authSlice';
+import { supabase } from '../lib/supabase'; // Supabase client
+import { updateProfile } from 'firebase/auth';
+import { auth } from '../lib/firebase'; // Firebase Auth
 import { motion } from 'framer-motion';
 
 interface ProfileModalProps {
@@ -12,9 +13,9 @@ interface ProfileModalProps {
 }
 
 export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
+  const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.auth.user);
   const [displayName, setDisplayName] = useState(user?.displayName || '');
-  const [email, setEmail] = useState(user?.email || '');
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoURL, setPhotoURL] = useState(user?.photoURL || '');
   const [isEditing, setIsEditing] = useState(false);
@@ -23,7 +24,6 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
   useEffect(() => {
     if (user) {
       setDisplayName(user.displayName || '');
-      setEmail(user.email || '');
       setPhotoURL(user.photoURL || '');
     }
   }, [user]);
@@ -35,28 +35,33 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
   };
 
   const handleSave = async () => {
-    if (!user) return;
+    if (!user || !auth.currentUser) return;
     try {
-      // Update profile (displayName and photoURL)
-      if (displayName !== user.displayName || photoFile) {
-        let newPhotoURL = photoURL;
-        if (photoFile) {
-          const storageRef = ref(storage, `profile_photos/${user.uid}`);
-          await uploadBytes(storageRef, photoFile);
-          newPhotoURL = await getDownloadURL(storageRef);
-          setPhotoURL(newPhotoURL);
-        }
-        await updateProfile(user, { displayName, photoURL: newPhotoURL });
+      setError(null);
+      let newPhotoURL = photoURL;
+
+      // Upload photo to Supabase Storage if a new file is selected
+      if (photoFile) {
+        const filePath = `${user.uid}/${photoFile.name}`;
+        const { error: uploadError } = await supabase.storage
+          .from('profile_photos')
+          .upload(filePath, photoFile, { upsert: true });
+        if (uploadError) throw uploadError;
+
+        const { data } = supabase.storage.from('profile_photos').getPublicUrl(filePath);
+        newPhotoURL = data.publicUrl;
+        setPhotoURL(newPhotoURL);
       }
 
-      // Update email if changed
-      if (email !== user.email) {
-        await updateEmail(user, email);
-      }
+      // Update Firebase Auth profile with new displayName and photoURL
+      await updateProfile(auth.currentUser, { displayName, photoURL: newPhotoURL });
+
+      // Update Redux store
+      const updatedUser = { ...auth.currentUser, displayName, photoURL: newPhotoURL };
+      dispatch(setUser(updatedUser));
 
       setIsEditing(false);
       setPhotoFile(null);
-      setError(null);
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update profile';
       setError(errorMessage);
@@ -75,7 +80,7 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
         className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 w-full max-w-md"
       >
         <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Your Profile</h2>
-        <div className="space-y-4">
+        <div className="space-y-6">
           {/* Photo */}
           <div className="flex justify-center">
             <div className="relative group">
@@ -92,7 +97,7 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                     onChange={handlePhotoChange}
                     className="hidden"
                   />
-                  <span className="text-white text-sm">Change Photo</span>
+                  <span className="text-white text-sm">Upload Photo</span>
                 </label>
               )}
             </div>
@@ -110,16 +115,16 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
             />
           </div>
 
-          {/* Email */}
+          {/* Email (Read-Only) */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
             <input
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={!isEditing}
-              className={`w-full p-3 mt-1 border rounded-lg dark:bg-gray-700 dark:text-white dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200 ${!isEditing ? 'bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400' : ''}`}
+              value={user.email || ''}
+              disabled
+              className="w-full p-3 mt-1 border rounded-lg bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 dark:border-gray-600 cursor-not-allowed"
             />
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Email cannot be changed here.</p>
           </div>
 
           {/* Error Message */}
