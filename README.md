@@ -25,12 +25,13 @@ Below are key features of TaskMaster:
 
 | Feature | Screenshot |
 |---------|------------|
-| **Sign Up**<br>Sign-up modal for new users. | ![Sign Up](screenshots/signup.png) |
-| **Sign In**<br>Sign-in modal for existing users. | ![Sign In](screenshots/signin.png) |
-| **Tasks List with Notifications**<br>Task list showing drag-and-drop and due date notifications. | ![Tasks List](screenshots/tasks-list.png) |
-| **Dashboard**<br>Overview of task stats with progress and categories. | ![Dashboard](screenshots/dashboard.png) |
-| **Analytics**<br>Charts displaying task completion and distribution. | ![Analytics](screenshots/analytics.png) |
-| **Calendar**<br>Calendar view of tasks with due dates. | ![Calendar](screenshots/calendar.png) |
+| **Sign Up**<br>Sign-up modal for new users. | ![Sign Up](screenshots/scr1.png) |
+| **Sign In**<br>Sign-in modal for existing users. | ![Sign In](screenshots/scr2.png) |
+| **Tasks**<br>Task list showing drag-and-drop and due date notifications. | ![Tasks List](screenshots/scr3.png) |
+| **New Task**<br>Add new task. | ![New Task](screenshots/scr4.png) |
+| **Dashboard**<br>Overview of task stats with progress and categories. | ![Dashboard](screenshots/scr5.png) |
+| **Analytics**<br>Charts displaying task completion and distribution. | ![Analytics](screenshots/scr6.png) |
+| **Calendar**<br>Calendar view of tasks with due dates. | ![Calendar](screenshots/scr7.png) |
 
 ## Implementation Details
 - **Language**: TypeScript with React
